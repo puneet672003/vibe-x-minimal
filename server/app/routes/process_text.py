@@ -33,6 +33,7 @@ async def process_text(story_text: str = Form(...)):
                         reason=reason,
                     )
                 )
+                break
             except HTTPStatusError as e:
                 if e.response.status_code == 429:
                     print(f"Rate limit hit. Retrying in {wait_time}s...")
