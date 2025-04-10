@@ -7,7 +7,7 @@ import axios from 'axios';
 // }
 
 const API = axios.create({
-	baseURL: 'http://localhost:8000',
+	baseURL: 'https://6d16-103-211-12-174.ngrok-free.app/',
 	withCredentials: false,
 });
 
