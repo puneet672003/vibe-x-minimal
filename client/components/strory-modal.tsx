@@ -1,79 +1,103 @@
-import react from "react";
+import type { ProcessedChunk } from '@/api/types';
 
-import { useRef, useState, useEffect, Dispatch, SetStateAction } from "react";
-import { Button } from "@heroui/button";
-import { Modal, ModalContent, ModalBody, ModalFooter } from "@heroui/modal";
-import { GrFormPrevious, GrFormNext } from "react-icons/gr";
+import React from 'react';
+import { useRef, useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { Button } from '@heroui/button';
+import { Modal, ModalContent, ModalBody, ModalFooter } from '@heroui/modal';
+import { GrFormPrevious, GrFormNext } from 'react-icons/gr';
+
+import CatLoading from '@/components/ui/cat-loading';
 
 export default function StoryModal({
-  storyChunks,
-  isModalOpen,
-  setIsModalOpen,
+	isLoading,
+	isModalOpen,
+	storyChunks,
+	setIsModalOpen,
 }: {
-  storyChunks: string[];
-  isModalOpen: boolean;
-  setIsModalOpen: Dispatch<SetStateAction<boolean>>;
+	isLoading: boolean,
+	isModalOpen: boolean,
+	storyChunks: ProcessedChunk[],
+	setIsModalOpen: Dispatch<SetStateAction<boolean>>,
 }) {
-  const [readingIndex, setReadingIndex] = useState<number>(0);
-  const currentParaRef = useRef<HTMLParagraphElement>(null);
+	const [readingIndex, setReadingIndex] = useState<number>(0);
+	const currentParaRef = useRef<HTMLParagraphElement>(null);
 
-  useEffect(() => {
-    if (readingIndex < 0) setReadingIndex(0);
-    if (readingIndex == storyChunks.length)
-      setReadingIndex(storyChunks.length - 1);
+	useEffect(() => {
+		// play song in loop
+		const { audio_url, start_time, end_time, reason } = storyChunks[
+			readingIndex
+		];
 
-    if (currentParaRef.current) {
-      currentParaRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [readingIndex]);
+		if (currentParaRef.current) {
+			currentParaRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'center',
+			});
+		}
+	}, [readingIndex]);
 
-  return (
-    <Modal
-      backdrop={"blur"}
-      isOpen={isModalOpen}
-      onClose={() => {
-        setIsModalOpen(false);
-        setReadingIndex(0);
-      }}
-      className="grow h-[calc(100vh-4rem)] w-full max-w-full !my-0">
-      <ModalContent>
-        <ModalBody className="w-full overflow-y-scroll scrollbar-hide !py-4">
-          {storyChunks.map((para, index) => {
-            const colorClass = ["text-scene-1", "text-scene-2", "text-scene-3"][
-              index % 3
-            ];
+	return (
+		<Modal
+			backdrop={'blur'}
+			isOpen={isModalOpen}
+			onClose={() => {
+				setIsModalOpen(false);
+				setReadingIndex(0);
+			}}
+			className="grow h-[calc(100vh-4rem)] w-full max-w-full !my-0 rounded-b-none"
+		>
+			<ModalContent>
+				<ModalBody className="w-full overflow-y-scroll scrollbar-hide !pb-4 !pt-8">
+					{isLoading ? (
+						<div className="w-full h-full flex-col justify-center items-center">
+							<CatLoading />
 
-            const opacity =
-              index == Number(readingIndex) ? "opacity-100" : "opacity-20";
+							<p className="text-center text-lg">
+								Processing your story... Please wait for a while :)
+							</p>
+						</div>
+					) : (
+						storyChunks.map((chunk, index) => {
+							const colorClass = [
+								'text-scene-1',
+								'text-scene-2',
+								'text-scene-3',
+							][index % 3];
 
-            return (
-              <p
-                key={index}
-                ref={index === readingIndex ? currentParaRef : null}
-                className={`rounded-md px-2 ${colorClass} ${opacity}`}>
-                {para}
-              </p>
-            );
-          })}
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            isIconOnly
-            isDisabled={readingIndex == 0}
-            onPress={() => setReadingIndex((prevIndex) => prevIndex - 1)}>
-            <GrFormPrevious />
-          </Button>
-          <Button
-            isIconOnly
-            isDisabled={readingIndex == storyChunks.length - 1}
-            onPress={() => setReadingIndex((prevIndex) => prevIndex + 1)}>
-            <GrFormNext />
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
-  );
+							const opacity =
+								index == Number(readingIndex) ? 'opacity-100' : 'opacity-20';
+
+							return (
+								<p
+									key={index}
+									ref={index === readingIndex ? currentParaRef : null}
+									className={`rounded-md px-2 transition-all duration-300 ${colorClass} ${opacity}`}
+								>
+									{chunk.chunk_text}
+								</p>
+							);
+						})
+					)}
+				</ModalBody>
+				{!isLoading && (
+					<ModalFooter>
+						<Button
+							isIconOnly
+							isDisabled={readingIndex == 0}
+							onPress={() => setReadingIndex((prevIndex) => prevIndex - 1)}
+						>
+							<GrFormPrevious />
+						</Button>
+						<Button
+							isIconOnly
+							isDisabled={readingIndex == storyChunks.length - 1}
+							onPress={() => setReadingIndex((prevIndex) => prevIndex + 1)}
+						>
+							<GrFormNext />
+						</Button>
+					</ModalFooter>
+				)}
+			</ModalContent>
+		</Modal>
+	);
 }
