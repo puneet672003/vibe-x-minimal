@@ -57,9 +57,9 @@ export default function Home() {
           <div className="w-full flex justify-center">
             <Card
               isHoverable={true}
-			  onClickCapture = {handleClick}
+			  
               className="py-4 md:w-[75%] md:h-[250px] flex justify-center cursor-pointer">
-              <CardBody className="overflow-visible py-10 flex flex-col justify-center items-center ">
+              <CardBody onClickCapture = {handleClick} className="overflow-visible py-10 flex flex-col justify-center items-center ">
                 <FiUploadCloud size={30} className="text-purple-400 mb-1" />
                 <p className="text-sm text-gray-400">
                   Drag and Drop or Click to Upload
